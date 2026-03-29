@@ -7,6 +7,8 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+My UML design consists of 4 classes, the owner which manages pets, pets which have a feeding schedule, and a scheduler that manages the owner. The owner is able to add a pet to its list, and get todays tasks. The pet is able to add a feeding task and get feeding tasks for the day. The feeding task is able to be marked complete or check if a feeding is today. The scheduler is able to build the schedule, get all tasks for the day, and explain the plan for the schedule.
+
 **b. Design changes**
 
 - Did your design change during implementation?
