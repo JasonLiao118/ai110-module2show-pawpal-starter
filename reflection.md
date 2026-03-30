@@ -14,6 +14,8 @@ My UML design consists of 4 classes, the owner which manages pets, pets which ha
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+Three changes were made during implementation into the class. The first issue was that both the owner and scheduler had get_todays_task so I just removed it for the owner and left it for the scheduler. The second issue was that feedingtask method has no date field so I added a parameter in the constructor for the scheduled date. The final issue was that the AI was unsure of the difference between buildschedule and gettodaystasks and I told AI that build schedule will handle most of the logic and the other method would just be a getter.
+
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
