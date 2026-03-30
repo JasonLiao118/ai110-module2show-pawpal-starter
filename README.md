@@ -89,3 +89,33 @@ python -m pytest
 - test_detect_conflicts_no_conflicts_returns_empty- tasks at different times produce no warnings.
 
 - test_detect_conflicts_three_tasks_same_time- three pets all scheduled at the same time produces exactly one warning naming all three pets.
+
+- Confidence level- 5 stars
+
+#### Features
+
+- Sorting by time
+
+- Conflict Warnings
+
+- Daily recurrence
+
+- Weekly recurrence
+
+- One-time tasks
+
+- Filter tasks by pet name
+
+- Filter tasks by completion status
+
+- Auto-reschedule on task completion
+
+- Priority-based schedule ordering
+
+- Interactive Streamlit UI for adding pets and tasks
+
+- Sortable and filterable schedule view in the UI
+
+#### Demo
+
+![PawPal+ Demo](SS.png)
