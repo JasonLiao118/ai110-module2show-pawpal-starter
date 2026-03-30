@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, timedelta
+from itertools import groupby
 
 PRIORITY_ORDER = {"high": 0, "medium": 1, "low": 2}
 
@@ -17,6 +18,23 @@ class FeedingTask:
     def mark_complete(self):
         """Mark this task as completed."""
         self.completed = True
+
+    def next_occurrence(self) -> "FeedingTask | None":
+        """Return a new FeedingTask for the next occurrence, or None if frequency is 'once'."""
+        if self.frequency == "daily":
+            next_date = self.scheduled_date + timedelta(days=1)
+        elif self.frequency == "weekly":
+            next_date = self.scheduled_date + timedelta(weeks=1)
+        else:
+            return None
+        return FeedingTask(
+            food_type=self.food_type,
+            amount_cups=self.amount_cups,
+            scheduled_time=self.scheduled_time,
+            priority=self.priority,
+            frequency=self.frequency,
+            scheduled_date=next_date
+        )
 
     def is_today(self) -> bool:
         """Return True if this task is scheduled to occur today based on its frequency."""
@@ -70,6 +88,48 @@ class Scheduler:
         for pet in self.owner.pets:
             all_tasks.extend(pet.get_feedings_for_today())
         return sorted(all_tasks, key=lambda t: (PRIORITY_ORDER.get(t.priority, 99), t.scheduled_time))
+
+    def sort_by_time(self, tasks: list[FeedingTask]) -> list[FeedingTask]:
+        """Sort a list of tasks by scheduled_time in ascending HH:MM order."""
+        return sorted(tasks, key=lambda t: t.scheduled_time)
+
+    def filter_tasks(self, completed: bool = None, pet_name: str = None) -> list[FeedingTask]:
+        """Filter today's tasks by completion status, pet name, or both."""
+        tasks = self.build_schedule()
+        if completed is not None:
+            tasks = [t for t in tasks if t.completed == completed]
+        if pet_name is not None:
+            tasks = [t for t in tasks
+                     if any(p.name == pet_name and t in p.feeding_schedule
+                            for p in self.owner.pets)]
+        return tasks
+
+    def detect_conflicts(self) -> list[str]:
+        """Return a list of warning messages for any tasks scheduled at the same time."""
+        tasks = self.sort_by_time(self.build_schedule())
+        warnings = []
+        for time_slot, group in groupby(tasks, key=lambda t: t.scheduled_time):
+            entries = list(group)
+            if len(entries) > 1:
+                labels = ", ".join(
+                    f"{next(p.name for p in self.owner.pets if t in p.feeding_schedule)} ({t.food_type})"
+                    for t in entries
+                )
+                warnings.append(f"Conflict at {time_slot}: {labels}")
+        return warnings
+
+    def complete_task(self, task: FeedingTask) -> FeedingTask | None:
+        """Mark a task complete and add the next occurrence to its pet's schedule. Returns the new task or None."""
+        task.mark_complete()
+        next_task = task.next_occurrence()
+        if next_task is not None:
+            pet = next(
+                (p for p in self.owner.pets if task in p.feeding_schedule),
+                None
+            )
+            if pet is not None:
+                pet.add_feeding(next_task)
+        return next_task
 
     def get_todays_tasks(self) -> list[FeedingTask]:
         """Return the fully built and sorted schedule for today."""
